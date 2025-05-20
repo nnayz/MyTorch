@@ -6,15 +6,34 @@ import numpy as np
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
+# Softmax activation function
+def softmax(x):
+    """
+    Args:
+        1D array of raw scores.
+    """
+    if not isinstance(x, np.ndarray):
+        x = np.array(x)
+    if x.ndim == 1:
+        exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
+        return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+    else:
+        raise ValueError(f"The input should be a 1D array, instead got {x.ndim}")
+
+# ReLu -> Rectified Linear Unit activation function
+def ReLu(x):
+    return 0 if x < 0 else x
+
 # %%
 class Dense_Layer:
-    def __init__(self, n_neurons, n_inputs):
+    def __init__(self, n_neurons, n_inputs, activation_fn=sigmoid):
         """
         n_inputs -> number of inputs per neuron
         n_neurons -> number of neurons
         """
         self.weights = np.random.rand(n_neurons, n_inputs)
         self.biases = np.random.rand(n_neurons)
+        self.activation_fn = activation_fn
 
         print(f"Layer created with {n_neurons} neurons, each expecting {n_inputs} inputs")
 
@@ -26,15 +45,15 @@ class Dense_Layer:
         print(inputs)
         weighted_sum = np.dot(self.weights, inputs)
         output_before_activation = weighted_sum + self.biases
+        if self.activation_fn == softmax:
+            output = softmax(output_before_activation)
+            return output
+        elif self.activation_fn == ReLu:
+            output = ReLu(output_before_activation)
+            return output
         output = sigmoid(output_before_activation)
         return output
 
-# %%
-layer = Dense_Layer(3, 2) # 3 neurons with 2 inputs to each neuron
-example_inputs = np.array([0.5, 1.0]) # 2 input values
-output = layer.forward(example_inputs)
-
-print(f"Output: {output} with shape {output.shape}")
 
 # %%
 class Input_Layer:
@@ -53,7 +72,8 @@ class Input_Layer:
         return data
 
 # %%
-n_features = 2 # For instance, height and weight
-data = np.array([160.0, 55.0]) # Representing height and weight
+# Neural Network
 input_layer = Input_Layer(2)
-input_layer.receive_data(data)
+hidden_layer = Dense_Layer(n_neurons=3, n_inputs=2)
+hidden_layer2 = Dense_Layer(n_neurons=3, n_inputs=3)
+output_layer = Dense_Layer(n_neurons=2, n_inputs=3, activation_fn=softmax)
