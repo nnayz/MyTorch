@@ -4,25 +4,35 @@ import numpy as np
 # %%
 # Sigmoid activation function
 def sigmoid(x):
+    """
+    Sigmoid function
+    """
     return 1 / (1 + np.exp(-x))
 
 # Softmax activation function
 def softmax(x):
     """
     Args:
-        1D array of raw scores.
+        1D, 2D array of raw scores.
     """
     if not isinstance(x, np.ndarray):
         x = np.array(x)
     if x.ndim == 1:
+        exp_x = np.exp(x - np.max(x))
+        return exp_x / np.sum(exp_x)
+    if x.ndim == 2:
         exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
         return exp_x / np.sum(exp_x, axis=1, keepdims=True)
     else:
-        raise ValueError(f"The input should be a 1D array, instead got {x.ndim}")
+        raise ValueError(f"The input should be a 1D or 2D array, instead got {x.ndim}D array")
 
 # ReLu -> Rectified Linear Unit activation function
 def ReLu(x):
-    return 0 if x < 0 else x
+    """
+    Args:
+        1D array or scalar
+    """
+    return np.maximum(0, x)
 
 # %%
 class Dense_Layer:
@@ -41,8 +51,6 @@ class Dense_Layer:
         """
         Inputs -> 1D array or a vector of all the input values
         """
-        print(self.weights)
-        print(inputs)
         weighted_sum = np.dot(self.weights, inputs)
         output_before_activation = weighted_sum + self.biases
         if self.activation_fn == softmax:
@@ -54,11 +62,11 @@ class Dense_Layer:
         output = sigmoid(output_before_activation)
         return output
 
-
 # %%
 class Input_Layer:
     def __init__(self, n_neurons):
         self.n_neurons = n_neurons # Represents the number of features
+        print(f"Input Layer created with n_neurons or features as {n_neurons}")
 
     def receive_data(self, data):
         if not isinstance(data, np.ndarray):
@@ -66,14 +74,23 @@ class Input_Layer:
 
         if data.shape[0] != self.n_neurons and data.ndim != 1:
             raise ValueError(
-                f"Expected a 1D Array with {self.n_neurons} features but received an array of {data.shape} dimensions"
+                f"Expected a 1D Array with {self.n_neurons} features but received an array of {data.ndim} dimensions"
             )
 
         return data
 
 # %%
 # Neural Network
-input_layer = Input_Layer(2)
+input_layer = Input_Layer(n_neurons=2)
 hidden_layer = Dense_Layer(n_neurons=3, n_inputs=2)
 hidden_layer2 = Dense_Layer(n_neurons=3, n_inputs=3)
 output_layer = Dense_Layer(n_neurons=2, n_inputs=3, activation_fn=softmax)
+
+my_data = np.array([160, 52]) # Height and weight as two features
+output_from_input_layer = input_layer.receive_data(data=my_data)
+
+output_from_hidden_layer = hidden_layer.forward(output_from_input_layer)
+output_from_hidden_layer2 = hidden_layer2.forward(output_from_hidden_layer)
+output_from_output_layer = output_layer.forward(output_from_hidden_layer2)
+
+print(f"Softmax output from the output layer : {output_from_output_layer}")
