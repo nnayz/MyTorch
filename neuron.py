@@ -6,6 +6,9 @@ def sigmoid(x):
     """
     return 1 / (1 + np.exp(-x))
 
+def ll(x):
+    return x
+
 class Neuron:
     def __init__(self, n_inputs):
         self.weights = np.random.rand(n_inputs) # Each input will have a weight associated with it

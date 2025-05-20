@@ -1,38 +1,23 @@
 # %%
 import numpy as np
+from activation_functions import sigmoid, softmax, sigmoid_derivative, ReLu_derivative, ReLu, linear_activation, linear_activation_derivative
 
 # %%
-# Sigmoid activation function
-def sigmoid(x):
-    """
-    Sigmoid function
-    """
-    return 1 / (1 + np.exp(-x))
+class Input_Layer:
+    def __init__(self, n_neurons):
+        self.n_neurons = n_neurons # Represents the number of features
+        print(f"Input Layer created with n_neurons or features as {n_neurons}")
 
-# Softmax activation function
-def softmax(x):
-    """
-    Args:
-        1D, 2D array of raw scores.
-    """
-    if not isinstance(x, np.ndarray):
-        x = np.array(x)
-    if x.ndim == 1:
-        exp_x = np.exp(x - np.max(x))
-        return exp_x / np.sum(exp_x)
-    if x.ndim == 2:
-        exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
-        return exp_x / np.sum(exp_x, axis=1, keepdims=True)
-    else:
-        raise ValueError(f"The input should be a 1D or 2D array, instead got {x.ndim}D array")
+    def receive_data(self, data):
+        if not isinstance(data, np.ndarray):
+            data = np.ndarray(data, dtype=float)
 
-# ReLu -> Rectified Linear Unit activation function
-def ReLu(x):
-    """
-    Args:
-        1D array or scalar
-    """
-    return np.maximum(0, x)
+        if data.shape[0] != self.n_neurons and data.ndim != 1:
+            raise ValueError(
+                f"Expected a 1D Array with {self.n_neurons} features but received an array of {data.ndim} dimensions"
+            )
+
+        return data
 
 # %%
 class Dense_Layer:
@@ -45,39 +30,38 @@ class Dense_Layer:
         self.biases = np.random.rand(n_neurons)
         self.activation_fn = activation_fn
 
+        if activation_fn == sigmoid:
+            self.activation_fn_derivative = sigmoid_derivative
+        elif activation_fn == ReLu:
+            self.activation_fn_derivative = ReLu_derivative
+        elif activation_fn == linear_activation:
+            self.activation_fn_derivative = linear_activation_derivative
+
+        # Placeholders for gradients (same shape as weights and biases)
+        self.dweights = np.zeros_like(self.weights)
+        self.dbiases = np.zeros_like(self.biases)
+
+        # To store the input during forward pass
+        self.inputs_cache = None
+
+        # To store the output before activation
+        self.z_cache = None
+
+        # To store the output after activation
+        self.activation_cache = None
+
         print(f"Layer created with {n_neurons} neurons, each expecting {n_inputs} inputs")
 
     def forward(self, inputs):
         """
         Inputs -> 1D array or a vector of all the input values
         """
+        self.inputs_cache = inputs # Store inputs
         weighted_sum = np.dot(self.weights, inputs)
-        output_before_activation = weighted_sum + self.biases
-        if self.activation_fn == softmax:
-            output = softmax(output_before_activation)
-            return output
-        elif self.activation_fn == ReLu:
-            output = ReLu(output_before_activation)
-            return output
-        output = sigmoid(output_before_activation)
-        return output
+        self.z_cache = weighted_sum + self.biases
+        self.activation_cache = self.activation_fn(self.z_cache)
+        return self.activation_cache
 
-# %%
-class Input_Layer:
-    def __init__(self, n_neurons):
-        self.n_neurons = n_neurons # Represents the number of features
-        print(f"Input Layer created with n_neurons or features as {n_neurons}")
-
-    def receive_data(self, data):
-        if not isinstance(data, np.ndarray):
-            data = np.ndarray(data)
-
-        if data.shape[0] != self.n_neurons and data.ndim != 1:
-            raise ValueError(
-                f"Expected a 1D Array with {self.n_neurons} features but received an array of {data.ndim} dimensions"
-            )
-
-        return data
 
 # %%
 # Neural Network
