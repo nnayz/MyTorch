@@ -62,28 +62,40 @@ class Dense_Layer:
         self.activation_cache = self.activation_fn(self.z_cache)
         return self.activation_cache
 
-    def backward(self, dactivation_output):
-        """
-        Backpropagation for this layer
-            Args :
-                (np.ndarray) dactivation_putput: Gradient of the cost function with respect to the activation output of this layer
-                (dC / dA)
-                Shape: (n_neurons, )
+    # def backward(self, dactivation_output):
+    #     """
+    #     Backpropagation for this layer
+    #         Args :
+    #             (np.ndarray) dactivation_putput: Gradient of the cost function with respect to the activation output of this layer
+    #             (dC / dA)
+    #             Shape: (n_neurons, )
 
-            Returns :
-                (np.ndarray) : Gradient of the cost function with respect to the activation output of the layer before this one
-                (dC / dA_prev_layer)
-                Shepe: (n_neurons, )
-        """
-        # Firstly, calculate the gradient before activation (dC / dZ)
-        # dC / dZ = dC / dA * dA / dZ
-        # if dA / dZ is the derivative of the activation function
-        dC_dZ = self.activation_fn_derivative(self.z_cache) * dactivation_output # dA / dZ * dC / dA
+    #         Returns :
+    #             (np.ndarray) : Gradient of the cost function with respect to the activation output of the layer before this one
+    #             (dC / dA_prev_layer)
+    #             Shepe: (n_neurons, )
+    #     """
+    #     # Firstly, calculate the gradient before activation (dC / dZ)
+    #     # dC / dZ = dC / dA * dA / dZ
+    #     # if dA / dZ is the derivative of the activation function
+    #     dC_dZ = self.activation_fn_derivative(self.z_cache) * dactivation_output # dA / dZ * dC / dA
 
-        # Secondly calculate gradient for weights and biases
-        self.dweights = np.outer(dC_dZ, self.inputs_cache)
-        self.dbiases = dC_dZ
+    #     # Secondly calculate gradient for weights and biases
+    #     self.dweights = np.outer(dC_dZ, self.inputs_cache)
+    #     self.dbiases = dC_dZ
 
-        # At last, calculate the gradient to pass to the previous layer
-        dinputs = np.dot(self.weights.T, dC_dZ)
-        return dinputs
+    #     # At last, calculate the gradient to pass to the previous layer
+    #     dinputs = np.dot(self.weights.T, dC_dZ)
+    #     return dinputs
+
+
+input_layer = Input_Layer(n_neurons=2)
+hidden_layer = Dense_Layer(n_neurons=3, n_inputs=2, activation_fn=ReLu)
+output_layer = Dense_Layer(n_neurons=2, n_inputs=3, activation_fn=linear_activation)
+
+data = np.array([160, 55])
+output = input_layer.receive_data(data)
+output_from_hidden_layer = hidden_layer.forward(output)
+output_from_output_layer = output_layer.forward(output_from_hidden_layer)
+
+print(output_from_output_layer)
