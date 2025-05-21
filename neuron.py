@@ -6,8 +6,6 @@ def sigmoid(x):
     """
     return 1 / (1 + np.exp(-x))
 
-def ll(x):
-    return x
 
 class Neuron:
     def __init__(self, n_inputs):
