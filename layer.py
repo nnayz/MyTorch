@@ -1,6 +1,6 @@
 # %%
 import numpy as np
-from activation_functions import sigmoid, softmax, sigmoid_derivative, ReLu_derivative, ReLu, linear_activation, linear_activation_derivative
+from activation_functions import sigmoid, sigmoid_derivative, ReLu_derivative, ReLu, linear_activation, linear_activation_derivative
 
 # %%
 class Input_Layer:
@@ -38,11 +38,11 @@ class Dense_Layer:
             self.activation_fn_derivative = linear_activation_derivative
 
         # Placeholders for gradients (same shape as weights and biases)
-        self.dweights = np.zeros_like(self.weights)
-        self.dbiases = np.zeros_like(self.biases)
+        self.dweights = np.zeros_like(self.weights) # In other words, how much each weight contributed to the error
+        self.dbiases = np.zeros_like(self.biases) # How much each bias contributed to the error
 
         # To store the input during forward pass
-        self.inputs_cache = None
+        # self.inputs_cache = None
 
         # To store the output before activation
         self.z_cache = None
@@ -62,19 +62,28 @@ class Dense_Layer:
         self.activation_cache = self.activation_fn(self.z_cache)
         return self.activation_cache
 
+    def backward(self, dactivation_output):
+        """
+        Backpropagation for this layer
+            Args :
+                (np.ndarray) dactivation_putput: Gradient of the cost function with respect to the activation output of this layer
+                (dC / dA)
+                Shape: (n_neurons, )
 
-# %%
-# Neural Network
-input_layer = Input_Layer(n_neurons=2)
-hidden_layer = Dense_Layer(n_neurons=3, n_inputs=2)
-hidden_layer2 = Dense_Layer(n_neurons=3, n_inputs=3)
-output_layer = Dense_Layer(n_neurons=2, n_inputs=3, activation_fn=softmax)
+            Returns :
+                (np.ndarray) : Gradient of the cost function with respect to the activation output of the layer before this one
+                (dC / dA_prev_layer)
+                Shepe: (n_neurons, )
+        """
+        # Firstly, calculate the gradient before activation (dC / dZ)
+        # dC / dZ = dC / dA * dA / dZ
+        # if dA / dZ is the derivative of the activation function
+        dC_dZ = self.activation_fn_derivative(self.z_cache) * dactivation_output # dA / dZ * dC / dA
 
-my_data = np.array([160, 52]) # Height and weight as two features
-output_from_input_layer = input_layer.receive_data(data=my_data)
+        # Secondly calculate gradient for weights and biases
+        self.dweights = np.outer(dC_dZ, self.inputs_cache)
+        self.dbiases = dC_dZ
 
-output_from_hidden_layer = hidden_layer.forward(output_from_input_layer)
-output_from_hidden_layer2 = hidden_layer2.forward(output_from_hidden_layer)
-output_from_output_layer = output_layer.forward(output_from_hidden_layer2)
-
-print(f"Softmax output from the output layer : {output_from_output_layer}")
+        # At last, calculate the gradient to pass to the previous layer
+        dinputs = np.dot(self.weights.T, dC_dZ)
+        return dinputs
