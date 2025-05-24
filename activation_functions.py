@@ -2,13 +2,29 @@ import numpy as np
 
 class Softmax:
     # Forward pass
-    def softmax(self, inputs):
+    def forward(self, inputs):
         self.inputs = inputs
         exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
         # Normalisation of the exp values
         confidences = exp_values / np.sum(exp_values, axis=1, keepdims=True)
         self.a = confidences
         return self.a
+    def backward(self, dvalues, y_true):
+        # Number of samples
+        samples = len(dvalues)
+
+        # If one hot encoded, turn to discrete values
+        if y_true.ndim == 2:
+            y_true = np.argmax(y_true, axis=1)
+
+        # copy
+        self.dinputs = dvalues.copy()
+
+        # Calculate gradient
+        self.dinputs[range(samples), y_true] -= 1
+
+        # Normalise gradient
+        self.dinputs = self.dinputs / samples
 
 class ReLu:
     # Forward pass

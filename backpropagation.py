@@ -53,5 +53,28 @@ inputs = np.array([
 biases = np.array([2., 3., 0.5])
 
 dweights = np.dot(inputs.T, dvalues)
-dbiases = np.sum(dvalues, axis=0, keepdims=True)
+dbiases = np.sum(dvalues, axis=0, keepdims=True) # Summing column wise
 print(f"Gradients for weights: \n{dweights}\nGradient for biases: {dbiases}")
+# %%
+# For the backward pass, Activation function receives a gradient of the same shape as that of the layer's outputs
+# Example layer output
+z = np.array([
+    [1., 2., -3., -4.],
+    [2., -7., -1., 3.],
+    [-1., 2., 5., -1.]
+])
+
+# Gradient from the next layer
+dvalues = np.array([
+    [1., 2., 3., 4.],
+    [5., 6., 7., 8.],
+    [9., 10, 11, 12]
+])
+
+# derivative of ReLu
+da_dz = np.zeros_like(z)
+da_dz[z > 0] = 1
+print(da_dz)
+# The chain rule
+da_dz = da_dz * dvalues
+print(da_dz)

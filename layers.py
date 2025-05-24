@@ -11,12 +11,9 @@ class Layer_Dense:
         # Output before activation
         self.z = np.dot(inputs, self.weights) + self.biases
 
-# Example usage
-# layer = Layer_Dense(n_neurons=2, n_inputs=2, activation_fn=softmax)
-# inputs = np.array([
-#     [2, 1],
-#     [3, 4]
-# ])
-# layer.forward(inputs)
-# print(layer.z)
-# print(layer.a)
+    def backward(self, dvalues):
+    # The original variables will be modified, make a copy
+        self.dinputs = dvalues.copy()
+
+        # Zero gradients where input values were negative
+        self.dinputs[dvalues <= 0] = 0

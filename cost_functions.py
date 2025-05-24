@@ -2,7 +2,7 @@ import numpy as np
 
 class CategoricalCrossEntropy:
 
-    def CCE(self, y_true, y_pred):
+    def forward(self, y_true, y_pred):
         # Number of samples in a batch
         samples = len(y_pred)
 
@@ -30,23 +30,19 @@ class CategoricalCrossEntropy:
         # loss
         negative_log_likelihoods = -np.log(correct_confidences)
         return negative_log_likelihoods
+    def backward(self, dvalues, y_true):
+    # Number of samples
+        samples = len(dvalues)
 
+        # Number of labels
+        labels = len(dvalues[0])
 
-# softmax_outputs = np.array([
-#     [0.8, 0.1, 0.1],
-#     [0.3, 0.6, 0.1],
-#     [0.2, 0.6, 0.2]
-# ])
+        # Convert to one hot
+        if y_true.ndim == 1:
+            y_true = np.eye(labels)[y_true]
 
-# # One hot encoded
-# correct_classes = np.array([
-#     [1, 0, 0],
-#     [0, 1, 0],
-#     [0, 1, 0]
-# ])
+        # Calculate gradient
+        self.dinputs = -y_true / dvalues
 
-# # Class targets
-# class_targets = np.array([0, 1, 1])
-
-# print(CCE(correct_classes, softmax_outputs)) # One hot encoded
-# print(CCE(class_targets, softmax_outputs)) # Class targets, Categorical Labels
+        # Normalize gradient
+        self.dinputs = self.dinputs / samples
