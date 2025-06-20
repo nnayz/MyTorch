@@ -1,7 +1,27 @@
 import numpy as np
+from abc import ABC, abstractmethod
 
-class CategoricalCrossEntropy:
+class Loss(ABC):
+    # Calculates the data and regularization losses
+    # given model output and ground truth values
+    def calculate(self, y_true, y_pred):
+        # Calculate sample loss
+        sample_losses = self.forward(y_true, y_pred)
 
+        # Ensure the result is a NumPy array before taking the mean
+        if sample_losses is None:
+            raise ValueError("Loss forward() returned None. Check implementation.")
+
+
+        # Calculate mean
+        return np.mean(sample_losses)
+
+    @abstractmethod
+    def forward(self, y_true, y_pred):
+        pass
+
+
+class CategoricalCrossEntropy(Loss):
     def forward(self, y_true, y_pred):
         # Number of samples in a batch
         samples = len(y_pred)

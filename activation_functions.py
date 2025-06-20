@@ -12,17 +12,13 @@ class Softmax:
     def backward(self, dvalues, y_true):
         # Number of samples
         samples = len(dvalues)
-
         # If one hot encoded, turn to discrete values
         if y_true.ndim == 2:
             y_true = np.argmax(y_true, axis=1)
-
         # copy
         self.dinputs = dvalues.copy()
-
         # Calculate gradient
         self.dinputs[range(samples), y_true] -= 1
-
         # Normalise gradient
         self.dinputs = self.dinputs / samples
 
