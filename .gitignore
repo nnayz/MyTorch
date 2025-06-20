@@ -3,3 +3,4 @@
 /archive
 /.ropeproject
 /venv
+**/__pycache__
