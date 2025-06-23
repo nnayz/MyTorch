@@ -3,10 +3,20 @@ import numpy as np
 class Tensor:
     def __init__(self, x, dtype=np.float32, requires_grad=False):
         self.data = np.asarray(x, dtype=dtype)
+        self.dtype = dtype
         self.requires_grad = requires_grad
         self.grad = None # Will store the gradient computed
         self._prev = set() # Parent tensors
         self._backward = lambda : None
+
+    @property
+    def T(self):
+        output = Tensor(self.data.T, requires_grad=self.requires_grad, dtype=self.dtype)
+        return output
+
+    @property
+    def ndim(self):
+        return self.data.ndim
 
     @property
     def shape(self):
@@ -48,8 +58,31 @@ class Tensor:
         output._backward = _backward
         return output
 
+    def __matmul__(self, operand):
+        if not isinstance(operand, Tensor):
+            raise TypeError("Operand must be a Tensor")
+
+
+        try:
+            output = Tensor(self.data @ operand.data, requires_grad=(self.requires_grad or operand.requires_grad))
+            output._prev = {self, operand}
+        except Exception as e:
+            raise ValueError(f"Incompatible shapes for matmul: {self.shape} @ {operand.shape}") from e
+
+        def _backward():
+            if self.requires_grad:
+                self.grad = (self.grad or np.zeros_like(self.data)) + operand.data
+            if operand.requires_grad:
+                operand.grad = (operand.grad or np.zeros_like(operand.data)) + self.data
+        output._backward = _backward
+        return output
+
+
     # Backpropagation
     def backward(self):
+        if self.ndim != 0:
+            raise RuntimeError("grad can be implicitly created only for scalar outputs")
+
         if not self.requires_grad:
             raise RuntimeError("Called backward on a non leaf tensor with requires_grad=False")
 
