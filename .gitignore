@@ -1,6 +1,16 @@
-/__pycache__
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
+venv/
+
+# MNIST Data
+archive/mnist_train.csv
+archive/mnist_test.csv
+
+# IDE
+.ropeproject/
 .DS_Store
-/archive
-/.ropeproject
-/venv
-**/__pycache__
