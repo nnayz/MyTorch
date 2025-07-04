@@ -18,15 +18,16 @@ git clone https://github.com/nnayz/MyTorch.git
 cd MyTorch
 ```
 
-2. Create and activate a virtual environment:
+2. Install uv (if not already installed):
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-3. Install dependencies:
+3. Create and activate a virtual environment with dependencies:
 ```bash
-pip install -r requirements.txt
+uv venv
+source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+uv pip install .
 ```
 
 4. Download MNIST Dataset:
@@ -68,7 +69,7 @@ MyTorch/
 │   └── nn.py          # Neural network modules
 ├── mnist_example.py    # Training script
 ├── evaluate_mnist.py   # Evaluation script
-└── requirements.txt    # Dependencies
+└── pyproject.toml     # Project configuration and dependencies
 ```
 
 ## Usage
