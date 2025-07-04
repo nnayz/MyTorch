@@ -1,6 +1,6 @@
 /__pycache__
 .DS_Store
-# /archive
+/archive
 /.ropeproject
 /venv
 **/__pycache__
